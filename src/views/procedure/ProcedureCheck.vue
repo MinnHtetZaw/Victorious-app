@@ -20,8 +20,8 @@
                         <div class="col-3">                
                           <div class="d-flex gap-2 align-items-center">
                             <select class="form-select w-50 procedure">
-                              <option >Oral </option>
-                              <option> Topica</option>
+                              <option v-for="category in categories" :value="category.id">{{ category.name }}</option>
+                          
                             </select>
                           </div>
                         </div>
@@ -230,6 +230,7 @@ export default {
   components: {SideNav},
   data() {
     return {
+      categories:{},
       oral_medicine : {},
       topical_medicine : {},
       skin_care_medicine : {},
@@ -622,12 +623,13 @@ export default {
 
       // console.log(this.treatment_array)
     },
+
    
-    
   },
   mounted() {
     this.show()
     this.totalAmount()
+    
 
     $('.oral').select2();
     $('.topical').select2();
@@ -655,6 +657,16 @@ export default {
         .catch(function (error) {
           console.log(error);
         });
+
+        axios.get(this.$store.state.url+'category')
+             .then(res => res.data.data)
+             .then(data=>{
+                   this.categories = data
+                  }
+            )
+              .catch(function (error) {
+               console.log(error);
+               });
 
     axios.get(this.$store.state.url+'skin_care')
         .then( res => res.data.data)
