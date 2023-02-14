@@ -19,19 +19,21 @@
                       <div class="row">
                         <div class="col-3">                
                           <div class="d-flex gap-2 align-items-center">
-                            <select class="form-select w-50 procedure">
-                              <option v-for="category in categories" :value="category.id">{{ category.name }}</option>
+
+                            <!-- <select class="form-select w-50 procedure">
+
+                              <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
                           
-                            </select>
+                            </select> -->
                           </div>
                         </div>
 
                         <div class="col-6">
                           <div class="d-flex gap-2 align-items-center">
-                            <select class="form-select w-50 procedure">
-                              <option v-for="treatment in treatments" :value="treatment.id">{{treatment.name}}</option>
+                            <select class="form-select w-50 medicine">
+                              <option v-for="medicine in medicines" :key="medicine.id" :value="medicine.id">{{medicine.name}}</option>
                             </select>
-                            <button @click="addTreatment" class="btn btn-primary btn-sm">
+                            <button @click="addMedicineUnit" class="btn btn-primary btn-sm">
                               <i class="fa-solid fa-circle-plus"></i>
                             </button>
                           </div>
@@ -60,7 +62,7 @@
               </tr>
               </thead>
               <tbody>
-              <tr v-for="(item,index) in items">
+              <tr v-for="(item,index) in items" >
                 <td style="width: 50px;" class="text-center">{{index + 1}}</td>
                 <td class="text-center">
                   <input name="item_name[]" readonly type="text" class="form-control form-control-sm border-0" :value="item.name">
@@ -225,11 +227,13 @@ import SideNav from "@/components/layout/SideNav";
 import axios from "axios";
 import router from "@/router";
 import Swal from "sweetalert2";
+import AddMedicine from "@/components/AddMedicine.vue";
 export default {
   name: "ProcedureCheck",
   components: {SideNav},
   data() {
     return {
+      
       categories:{},
       oral_medicine : {},
       topical_medicine : {},
@@ -237,13 +241,15 @@ export default {
       treatments: null,
       medicines: null,
       treatment_array: [],
-      item_array: [],
+      // items: [],
       procedure : {},
-      items : '',
+      items : [],
       total_price : '',
       item_discount_option : '',
     }
   },
+  
+  
   methods: {
     show : function (){
       localStorage.removeItem('myCart')
@@ -432,204 +438,53 @@ export default {
         }
       })
     },
-
-    addOralMedicine(){
+    addMedicineUnit(){
       let id = 0;
-      let length = this.item_array.length
+      let length = this.items.length
       if (length <= 0){
          id = 1;
       }else if (length > 0){
         id = length + 1
       }
-      let item_id = $('.oral').val()
+      let item_id = $('.medicine').val()
       let medicine = this.medicines.find(el=>el.id == item_id)
       let name = medicine.name
       let quantity = 1
       let selling_price = medicine.selling_price
       let day = 1
       let medicine_obj = {
-        type: 'oral',
+        type: '',
         id: id,
         item_id: item_id,
         name: name,
         qty: quantity,
         selling_price : selling_price,
-        sub_total: quantity * selling_price,
-        total_qty: quantity * day,
-        day: day,
-        dose: '',
-        sig: '',
-        extra_sig: '',
-      };
-      //Check id (id တူရင် data မထည့်)
-      if (this.item_array.length == 0){
-        this.item_array.push(medicine_obj)
-      }else if (this.item_array.length > 0){
+        total_price: quantity * selling_price,
+
+        };
+      if (this.items.length == 0){
+        this.items.push(medicine_obj)
+      }else if (this.items.length > 0){
         let has_id = [];
-        this.item_array.map(el=>{
+        this.items.map(el=>{
           has_id.push(el.item_id)
         })
         // **********
         if (has_id.includes(item_id) == true){
-          let item = this.item_array.find(el=>el.item_id == item_id)
+          let item = this.items.find(el=>el.item_id == item_id)
           item.qty += 1;
-          item.total_qty = item.qty * item.day
-          item.sub_total = item.total_qty * item.selling_price
+          item.total_qty = item.qty * 1
+          item.total_price = item.total_qty * item.selling_price
         }else{
-          this.item_array.push(medicine_obj)
+          this.items.push(medicine_obj)
         }
       }
-
     },
-    addTopicalMedicine(){
-      let id = 0;
-      let length = this.item_array.length
-      if (length <= 0){
-         id = 1;
-      }else if (length > 0){
-        id = length + 1
-      }
-      let item_id = $('.topical').val()
-      let medicine = this.medicines.find(el=>el.id == item_id)
-      let name = medicine.name
-      let quantity = 1
-      let selling_price = medicine.selling_price
-      let day = 1
-      let medicine_obj = {
-        type: 'topical',
-        id: id,
-        item_id: item_id,
-        name: name,
-        qty: quantity,
-        selling_price : selling_price,
-        sub_total: quantity * selling_price,
-        total_qty: quantity * day,
-        day: day,
-        dose: '',
-        sig: '',
-        extra_sig: '',
-      };
-      //Check id (id တူရင် data မထည့်)
-      if (this.item_array.length == 0){
-        this.item_array.push(medicine_obj)
-      }else if (this.item_array.length > 0){
-        let has_id = [];
-        this.item_array.map(el=>{
-          has_id.push(el.item_id)
-        })
-        // **********
-        if (has_id.includes(item_id) == true){
-          let item = this.item_array.find(el=>el.item_id == item_id)
-          item.qty += 1;
-          item.total_qty = item.qty * item.day
-          item.sub_total = item.total_qty * item.selling_price
-        }else{
-          this.item_array.push(medicine_obj)
-        }
-        // console.log(this.item_array)
-      }
-    },
-    addSkinCareMedicine(){
-      let id = 0;
-      let length = this.item_array.length
-      if (length <= 0){
-         id = 1;
-      }else if (length > 0){
-        id = length + 1
-      }
-      let item_id = $('.skin_care_medicine').val()
-      let medicine = this.medicines.find(el=>el.id == item_id)
-      let name = medicine.name
-      let quantity = 1
-      let selling_price = medicine.selling_price
-      let day = 1
-      let medicine_obj = {
-        type: 'skin-care',
-        id: id,
-        item_id: item_id,
-        name: name,
-        qty: quantity,
-        selling_price : selling_price,
-        sub_total: quantity * selling_price,
-        total_qty: quantity * day,
-        day: day,
-        dose: '',
-        sig: '',
-        extra_sig: '',
-      };
-      //Check id (id တူရင် data မထည့်)
-      if (this.item_array.length == 0){
-        this.item_array.push(medicine_obj)
-      }else if (this.item_array.length > 0){
-        let has_id = [];
-        this.item_array.map(el=>{
-          has_id.push(el.item_id)
-        })
-        // **********
-        if (has_id.includes(item_id) == true){
-          let item = this.item_array.find(el=>el.item_id == item_id)
-          item.qty += 1;
-          item.total_qty = item.qty * item.day
-          item.sub_total = item.total_qty * item.selling_price
-        }else{
-          this.item_array.push(medicine_obj)
-        }
-      }
-      // console.log(this.item_array)
-
-    },
-    addTreatment(){
-      let id = 0;
-      let length = this.treatment_array.length
-      if (length <= 0){
-        id = 1;
-      }else if (length > 0){
-        id = length + 1
-      }
-      let treatment_id = $('.procedure').val()
-      let procedure = this.treatments.find(el=>el.id == treatment_id)
-      let name = procedure.name
-      let quantity = 1
-      let day = 1
-      let selling_price = procedure.selling_price
-
-      let procedure_obj = {
-        id: id,
-        treatment_id: treatment_id,
-        name: name,
-        qty: quantity,
-        selling_price : selling_price,
-        sub_total: quantity * selling_price,
-        sig: ''
-      };
-
-      //Check id (id တူရင် data မထည့်)
-      if (this.treatment_array.length == 0){
-        this.treatment_array.push(procedure_obj)
-      }else if (this.treatment_array.length > 0){
-        let has_id = [];
-        this.treatment_array.map(el=>{
-          has_id.push(el.treatment_id)
-        })
-        // **********
-        if (has_id.includes(treatment_id) == true){
-          let item = this.treatment_array.find(el=>el.treatment_id == treatment_id)
-          item.qty += 1;
-          item.sub_total = item.qty * item.selling_price
-        }else{
-          this.treatment_array.push(procedure_obj)
-        }
-      }
-
-      // console.log(this.treatment_array)
-    },
-
-   
   },
   mounted() {
     this.show()
     this.totalAmount()
-    
+ 
 
     $('.oral').select2();
     $('.topical').select2();
